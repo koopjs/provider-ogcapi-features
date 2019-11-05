@@ -1,5 +1,5 @@
 // Define the provider path
-// /:name/:hosts?/FeatureServer/:layer/:method
+// /:name/:host/FeatureServer/:layer/:method
 // e.g. /servername/FeatureServer/0/query
 const provider = {
   type: "provider",
@@ -8,7 +8,6 @@ const provider = {
   hosts: true,
   disableIdParam: true,
   Model: require("./model")
-  // routes: require('./routes')
 };
 
 module.exports = provider;

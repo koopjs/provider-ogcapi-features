@@ -13,17 +13,17 @@ const collections = new NodeCache();
 // req.params.method
 function getData(req, callback) {
   const {
-    params: { method }
+    params: { layer, method }
   } = req;
 
   if (method) {
     getCollectionItems(req, callback);
-  } else {
+  } else if (layer) {
     getCollectionInfo(req, callback);
+  } else {
+    callback(new Error("No layer is provided"));
   }
 }
-
-function getCollections(req, callback) {}
 
 async function getCollectionInfo(req, callback) {
   const {
@@ -154,6 +154,5 @@ function parseGeometry(geometry) {
 function Model(koop) {}
 
 Model.prototype.getData = getData;
-// Model.prototype.getCollections = getCollections
 
 module.exports = Model;
