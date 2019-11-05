@@ -1,2 +1,3 @@
-# provider-ogc-api-features
+# provider-ogcapi-features
+
 Experimental Koop provider for OGC API - Features
