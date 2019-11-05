@@ -37,15 +37,14 @@ async function getCollectionInfo(req, callback) {
 
     // construct geojson
     const idField = hostConfig.idField ? hostConfig.idField : "";
+    const bbox = collection.extent.spatial.bbox[0];
     const geojson = {
       type: "FeatureCollection",
       features: [],
       metadata: {
         name: collection.title,
-        extent: [
-          [collection.extent.spatial[0], collection.extent.spatial[1]],
-          [collection.extent.spatial[2], collection.extent.spatial[3]]
-        ],
+        description: collection.description,
+        extent: [[bbox[0], bbox[1]], [bbox[2], bbox[3]]],
         idField
       }
     };
@@ -62,6 +61,7 @@ async function getCollectionItems(req, callback) {
     query: { geometry, geometryType }
   } = req;
   const hostConfig = config["provider-ogcapi-features"].hosts[host];
+  const filtersApplied = {};
 
   try {
     // construct the request URL
@@ -75,6 +75,7 @@ async function getCollectionItems(req, callback) {
     if (geometryType === "esriGeometryEnvelope") {
       const bbox = getBbox(geometry);
       requestURL.searchParams.set("bbox", bbox);
+      filtersApplied.geometry = true;
     }
 
     // get request result
@@ -87,8 +88,10 @@ async function getCollectionItems(req, callback) {
       features: result.features,
       metadata: {
         name: collection.title,
+        description: collection.description,
         idField
-      }
+      },
+      filtersApplied
     };
 
     callback(null, geojson);
