@@ -58,7 +58,8 @@ async function getCollectionInfo(req, callback) {
 
 async function getCollectionItems(req, callback) {
   const {
-    params: { host, layer }
+    params: { host, layer },
+    query: { geometry, geometryType }
   } = req;
   const hostConfig = config["provider-ogcapi-features"].hosts[host];
 
@@ -70,6 +71,11 @@ async function getCollectionItems(req, callback) {
       `${hostURL}/collections/${collection.name}/items`
     );
     requestURL.searchParams.set("f", "json");
+
+    if (geometryType === "esriGeometryEnvelope") {
+      const bbox = getBbox(geometry);
+      requestURL.searchParams.set("bbox", bbox);
+    }
 
     // get request result
     const result = await fetchJSON(requestURL.href);
@@ -125,6 +131,24 @@ async function fetchJSON(url) {
   }
 
   return await response.json();
+}
+
+function getBbox(geometry) {
+  const parsed = parseGeometry(geometry);
+
+  if (!parsed) {
+    return;
+  }
+
+  return `${parsed.xmin},${parsed.ymin},${parsed.xmax},${parsed.ymax}`;
+}
+
+function parseGeometry(geometry) {
+  try {
+    return JSON.parse(geometry);
+  } catch (error) {
+    return;
+  }
 }
 
 function Model(koop) {}
