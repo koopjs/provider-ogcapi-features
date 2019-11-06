@@ -3,6 +3,7 @@ const NodeCache = require("node-cache");
 const config = require("config");
 
 const collections = new NodeCache();
+const isRefreshingCollections = {};
 
 // Public function to return data from the
 // Return: GeoJSON FeatureCollection
@@ -106,7 +107,17 @@ async function getCollection({ id, url }, index) {
     return collections.get(collectionCacheId);
   }
 
-  await refreshCollectionCache({ id, url });
+  if (!isRefreshingCollections[id]) {
+    isRefreshingCollections[id] = true;
+
+    try {
+      await refreshCollectionCache({ id, url });
+      isRefreshingCollections[id] = false;
+    } catch (error) {
+      isRefreshingCollections[id] = false;
+      throw error;
+    }
+  }
 
   if (collections.has(collectionCacheId)) {
     return collections.get(collectionCacheId);
