@@ -67,9 +67,8 @@ async function getCollectionItems(req, callback) {
     // construct the request URL
     const hostURL = hostConfig.url;
     const collection = await getCollection(hostURL, layer);
-    const requestURL = new URL(
-      `${hostURL}/collections/${collection.name}/items`
-    );
+    const collectionId = collection.id || collection.name;
+    const requestURL = new URL(`${hostURL}/collections/${collectionId}/items`);
     requestURL.searchParams.set("f", "json");
 
     if (geometryType === "esriGeometryEnvelope") {
