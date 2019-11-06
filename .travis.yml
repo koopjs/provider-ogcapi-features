@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "lts/*"
+os:
+  - linux
+  - osx
+  - windows
+install:
+  - npm install
+script:
+  - npm run test
