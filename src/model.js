@@ -33,7 +33,7 @@ async function getCollectionInfo(req, callback) {
 
   try {
     const hostURL = hostConfig.url;
-    const collection = await getCollection(hostURL, layer);
+    const collection = await getCollection({ id: host, url: hostURL }, layer);
 
     // construct geojson
     const idField = hostConfig.idField ? hostConfig.idField : "";
@@ -66,7 +66,7 @@ async function getCollectionItems(req, callback) {
   try {
     // construct the request URL
     const hostURL = hostConfig.url;
-    const collection = await getCollection(hostURL, layer);
+    const collection = await getCollection({ id: host, url: hostURL }, layer);
     const collectionId = collection.id || collection.name;
     const requestURL = new URL(`${hostURL}/collections/${collectionId}/items`);
     requestURL.searchParams.set("f", "json");
@@ -99,30 +99,37 @@ async function getCollectionItems(req, callback) {
   }
 }
 
-async function getCollection(hostURL, index) {
-  if (collections.has(index)) {
-    return collections.get(index);
+async function getCollection({ id, url }, index) {
+  const collectionCacheId = `${id}_${index}`;
+
+  if (collections.has(collectionCacheId)) {
+    return collections.get(collectionCacheId);
   }
 
-  await refreshCollectionCache(hostURL);
+  await refreshCollectionCache({ id, url });
 
-  if (collections.has(index)) {
-    return collections.get(index);
+  if (collections.has(collectionCacheId)) {
+    return collections.get(collectionCacheId);
   }
 
-  throw new Error(`Collection ${index} not found`);
+  throw new Error(`Collection ${index} not found in the host ${id}`);
 }
 
-async function refreshCollectionCache(hostURL) {
-  const requestURL = new URL(`${hostURL}/collections`);
+async function refreshCollectionCache({ id, url }) {
+  const requestURL = new URL(`${url}/collections`);
   requestURL.searchParams.set("f", "json");
 
   const result = await fetchJSON(requestURL.href);
-  collections.flushAll();
+  clearCollectionCache(id);
 
-  for (const [index, collection] of result.collections.entries()) {
-    collections.set(index, collection);
+  for (const [layerIndex, collection] of result.collections.entries()) {
+    collections.set(`${id}_${layerIndex}`, collection);
   }
+}
+
+function clearCollectionCache(hostId) {
+  const keys = collections.keys().filter(key => key.startsWith(hostId));
+  collections.del(keys);
 }
 
 async function fetchJSON(url) {
