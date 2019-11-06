@@ -1,6 +1,6 @@
 # @koopjs/provider-ogcapi-features
 
-[![npm (scoped)](https://img.shields.io/npm/v/koopjs/provider-ogcapi-features)](https://www.npmjs.com/package/@koopjs/provider-ogcapi-features) [![Build Status](https://www.travis-ci.org/koopjs/provider-ogcapi-features.svg?branch=master)](https://www.travis-ci.org/koopjs/provider-ogcapi-features)
+[![npm](https://img.shields.io/npm/v/@koopjs/provider-ogcapi-features)](https://www.npmjs.com/package/@koopjs/provider-ogcapi-features) [![Build Status](https://www.travis-ci.org/koopjs/provider-ogcapi-features.svg?branch=master)](https://www.travis-ci.org/koopjs/provider-ogcapi-features)
 
 Experimental Koop provider for [OGC API - Features](https://github.com/opengeospatial/ogcapi-features)
 
