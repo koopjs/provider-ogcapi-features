@@ -67,3 +67,8 @@ If the app is developed using the [Koop CLI](https://github.com/koopjs/koop-cli)
 ```bash
 koop add @koopjs/provider-ogcapi-features
 ```
+
+## Roadmap
+
+- [ ] Support pagination using the `limit` parameter or prev/next link
+- [ ] Support property filtering
