@@ -11,48 +11,15 @@ const isRefreshingCollections = {};
 // URL path parameters:
 // req.params.host
 // req.params.layer
-// req.params.method
 function getData(req, callback) {
   const {
-    params: { layer, method }
+    params: { layer }
   } = req;
 
-  if (method) {
+  if (layer) {
     getCollectionItems(req, callback);
-  } else if (layer) {
-    getCollectionInfo(req, callback);
   } else {
     callback(new Error("No layer is provided"));
-  }
-}
-
-async function getCollectionInfo(req, callback) {
-  const {
-    params: { host, layer }
-  } = req;
-  const hostConfig = config["provider-ogcapi-features"].hosts[host];
-
-  try {
-    const hostURL = hostConfig.url;
-    const collection = await getCollection({ id: host, url: hostURL }, layer);
-
-    // construct geojson
-    const idField = hostConfig.idField ? hostConfig.idField : "";
-    const bbox = collection.extent.spatial.bbox[0];
-    const geojson = {
-      type: "FeatureCollection",
-      features: [],
-      metadata: {
-        name: collection.title,
-        description: collection.description,
-        extent: [[bbox[0], bbox[1]], [bbox[2], bbox[3]]],
-        idField
-      }
-    };
-
-    callback(null, geojson);
-  } catch (error) {
-    callback(error);
   }
 }
 

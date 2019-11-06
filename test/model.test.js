@@ -61,38 +61,7 @@ describe("model", function() {
     });
   });
 
-  it("should return the collection info if only the layer index is provided", done => {
-    const fetch = fetchMock
-      .sandbox()
-      .mock("https://service-url.com/collections?f=json", COLLECTIONS_RESPONSE);
-
-    const Model = proxyquire(modulePath, {
-      config: PROVIDER_CONFIG,
-      "node-fetch": fetch
-    });
-
-    const model = new Model();
-    const req = {
-      params: {
-        host: "myhost",
-        layer: "0"
-      }
-    };
-
-    model.getData(req, (err, geojson) => {
-      expect(err).to.equal(null);
-      expect(geojson.type).to.equal("FeatureCollection");
-      expect(geojson.features).to.be.an("array");
-      expect(geojson.features).to.have.lengthOf(0);
-      expect(geojson.metadata.name).to.equal("collection title");
-      expect(geojson.metadata.description).to.equal("collection description");
-      expect(geojson.metadata.extent).to.deep.equal([[1, 2], [3, 4]]);
-
-      done();
-    });
-  });
-
-  it("should return collection items if the query method is specified", done => {
+  it("should return collection items if the layer index is specified", done => {
     const fetch = fetchMock
       .sandbox()
       .mock("https://service-url.com/collections?f=json", COLLECTIONS_RESPONSE)
