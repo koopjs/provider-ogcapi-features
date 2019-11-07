@@ -79,7 +79,7 @@ describe("model", function() {
     const req = {
       params: {
         host: "myhost",
-        layer: "0",
+        id: "collection_id",
         method: "query"
       },
       query: {}

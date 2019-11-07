@@ -13,19 +13,19 @@ const isRefreshingCollections = {};
 // req.params.layer
 function getData(req, callback) {
   const {
-    params: { layer }
+    params: { id }
   } = req;
 
-  if (layer) {
+  if (id) {
     getCollectionItems(req, callback);
   } else {
-    callback(new Error("No layer is provided"));
+    callback(new Error("No collection ID is provided"));
   }
 }
 
 async function getCollectionItems(req, callback) {
   const {
-    params: { host, layer },
+    params: { host, id },
     query: { geometry, geometryType }
   } = req;
   const hostConfig = config["provider-ogcapi-features"].hosts[host];
@@ -33,9 +33,12 @@ async function getCollectionItems(req, callback) {
 
   try {
     // construct the request URL
+    const collectionId = id;
     const hostURL = hostConfig.url;
-    const collection = await getCollection({ id: host, url: hostURL }, layer);
-    const collectionId = collection.id || collection.name;
+    const collection = await getCollection(
+      { id: host, url: hostURL },
+      collectionId
+    );
     const requestURL = new URL(`${hostURL}/collections/${collectionId}/items`);
     requestURL.searchParams.set("f", "json");
 
@@ -67,8 +70,8 @@ async function getCollectionItems(req, callback) {
   }
 }
 
-async function getCollection({ id, url }, index) {
-  const collectionCacheId = `${id}_${index}`;
+async function getCollection({ id, url }, collectionId) {
+  const collectionCacheId = `${id}_${collectionId}`;
 
   if (collections.has(collectionCacheId)) {
     return collections.get(collectionCacheId);
@@ -90,7 +93,7 @@ async function getCollection({ id, url }, index) {
     return collections.get(collectionCacheId);
   }
 
-  throw new Error(`Collection ${index} not found in the host ${id}`);
+  throw new Error(`Collection ${collectionId} not found in the host ${id}`);
 }
 
 async function refreshCollectionCache({ id, url }) {
@@ -100,8 +103,9 @@ async function refreshCollectionCache({ id, url }) {
   const result = await fetchJSON(requestURL.href);
   clearCollectionCache(id);
 
-  for (const [layerIndex, collection] of result.collections.entries()) {
-    collections.set(`${id}_${layerIndex}`, collection);
+  for (const collection of result.collections) {
+    const collectionId = collection.id || collection.name;
+    collections.set(`${id}_${collectionId}`, collection);
   }
 }
 

@@ -1,14 +1,14 @@
 const packageInfo = require("../package");
 
 // Define the provider path
-// /:name/:host/FeatureServer/:layer/:method
+// /:name/:host/:id/FeatureServer/0/:method
 // e.g. /servername/FeatureServer/0/query
 const provider = {
   type: "provider",
   name: "ogcapi-features",
   version: packageInfo.version,
   hosts: true,
-  disableIdParam: true,
+  disableIdParam: false,
   Model: require("./model")
 };
 
