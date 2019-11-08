@@ -1,6 +1,8 @@
 const fetch = require("node-fetch");
 const NodeCache = require("node-cache");
 const config = require("config");
+const arcgisParser = require("terraformer-arcgis-parser");
+const toBbox = require("@turf/bbox");
 
 const collections = new NodeCache();
 const isRefreshingCollections = {};
@@ -42,6 +44,8 @@ async function getCollectionItems(req, callback) {
     const requestURL = new URL(`${hostURL}/collections/${collectionId}/items`);
     requestURL.searchParams.set("f", "json");
 
+    // the geoservice output may send the "geometry" filter, since it is the default
+    // output for koop-core, handle it specifically
     if (geometryType === "esriGeometryEnvelope") {
       const bbox = getBbox(geometry);
       requestURL.searchParams.set("bbox", bbox);
@@ -131,7 +135,10 @@ function getBbox(geometry) {
     return;
   }
 
-  return `${parsed.xmin},${parsed.ymin},${parsed.xmax},${parsed.ymax}`;
+  const geojson = arcgisParser.parse(parsed);
+  const bbox = toBbox.default(geojson);
+
+  return bbox.join(",");
 }
 
 function parseGeometry(geometry) {
