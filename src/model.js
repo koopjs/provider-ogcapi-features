@@ -26,11 +26,9 @@ function getData(req, callback) {
 
 async function getCollectionItems(req, callback) {
   const {
-    params: { host, id },
-    query: { geometry, geometryType }
+    params: { host, id }
   } = req;
   const hostConfig = config["provider-ogcapi-features"].hosts[host];
-  const filtersApplied = {};
 
   try {
     // construct the request URL
@@ -42,14 +40,6 @@ async function getCollectionItems(req, callback) {
     );
     const requestURL = new URL(`${hostURL}/collections/${collectionId}/items`);
     requestURL.searchParams.set("f", "json");
-
-    // the geoservice output may send the "geometry" filter, since it is the default
-    // output for koop-core, handle it specifically
-    if (geometryType === "esriGeometryEnvelope") {
-      const bbox = getBbox(geometry);
-      requestURL.searchParams.set("bbox", bbox);
-      filtersApplied.geometry = true;
-    }
 
     // get request result
     const result = await fetchJSON(requestURL.href);
@@ -63,8 +53,7 @@ async function getCollectionItems(req, callback) {
         name: collection.title,
         description: collection.description,
         idField
-      },
-      filtersApplied
+      }
     };
 
     callback(null, geojson);
@@ -97,27 +86,6 @@ async function fetchJSON(url) {
   }
 
   return await response.json();
-}
-
-function getBbox(geometry) {
-  const parsed = parseGeometry(geometry);
-
-  if (!parsed) {
-    return;
-  }
-
-  const geojson = arcgisParser.parse(parsed);
-  const bbox = toBbox.default(geojson);
-
-  return bbox.join(",");
-}
-
-function parseGeometry(geometry) {
-  try {
-    return JSON.parse(geometry);
-  } catch (error) {
-    return;
-  }
 }
 
 function Model(koop) {}
