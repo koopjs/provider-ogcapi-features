@@ -1,8 +1,6 @@
 const fetch = require("node-fetch");
 const NodeCache = require("node-cache");
 const config = require("config");
-const arcgisParser = require("terraformer-arcgis-parser");
-const toBbox = require("@turf/bbox");
 
 const collections = new NodeCache();
 
