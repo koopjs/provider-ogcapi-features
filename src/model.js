@@ -5,7 +5,6 @@ const arcgisParser = require("terraformer-arcgis-parser");
 const toBbox = require("@turf/bbox");
 
 const collections = new NodeCache();
-const isRefreshingCollections = {};
 
 // Public function to return data from the
 // Return: GeoJSON FeatureCollection
@@ -81,41 +80,13 @@ async function getCollection({ id, url }, collectionId) {
     return collections.get(collectionCacheId);
   }
 
-  if (!isRefreshingCollections[id]) {
-    isRefreshingCollections[id] = true;
-
-    try {
-      await refreshCollectionCache({ id, url });
-      isRefreshingCollections[id] = false;
-    } catch (error) {
-      isRefreshingCollections[id] = false;
-      throw error;
-    }
-  }
-
-  if (collections.has(collectionCacheId)) {
-    return collections.get(collectionCacheId);
-  }
-
-  throw new Error(`Collection ${collectionId} not found in the host ${id}`);
-}
-
-async function refreshCollectionCache({ id, url }) {
-  const requestURL = new URL(`${url}/collections`);
+  const requestURL = new URL(`${url}/collections/${collectionId}`);
   requestURL.searchParams.set("f", "json");
 
   const result = await fetchJSON(requestURL.href);
-  clearCollectionCache(id);
+  collections.set(collectionCacheId, result);
 
-  for (const collection of result.collections) {
-    const collectionId = collection.id || collection.name;
-    collections.set(`${id}_${collectionId}`, collection);
-  }
-}
-
-function clearCollectionCache(hostId) {
-  const keys = collections.keys().filter(key => key.startsWith(hostId));
-  collections.del(keys);
+  return result;
 }
 
 async function fetchJSON(url) {

@@ -17,19 +17,15 @@ const PROVIDER_CONFIG = {
   }
 };
 
-const COLLECTIONS_RESPONSE = {
-  collections: [
-    {
-      id: "collection_id",
-      title: "collection title",
-      description: "collection description",
-      extent: {
-        spatial: {
-          bbox: [[1, 2, 3, 4]]
-        }
-      }
+const COLLECTION_RESPONSE = {
+  id: "collection_id",
+  title: "collection title",
+  description: "collection description",
+  extent: {
+    spatial: {
+      bbox: [[1, 2, 3, 4]]
     }
-  ]
+  }
 };
 
 const COLLECTION_ITEMS_RESPONSE = {
@@ -64,7 +60,10 @@ describe("model", function() {
   it("should return collection items if the layer index is specified", done => {
     const fetch = fetchMock
       .sandbox()
-      .mock("https://service-url.com/collections?f=json", COLLECTIONS_RESPONSE)
+      .mock(
+        "https://service-url.com/collections/collection_id?f=json",
+        COLLECTION_RESPONSE
+      )
       .mock(
         "https://service-url.com/collections/collection_id/items?f=json",
         COLLECTION_ITEMS_RESPONSE
@@ -100,7 +99,10 @@ describe("model", function() {
   it("it should use the bbox parameter if the geometry filter type is envelop", done => {
     const fetch = fetchMock
       .sandbox()
-      .mock("https://service-url.com/collections?f=json", COLLECTIONS_RESPONSE)
+      .mock(
+        "https://service-url.com/collections/collection_id?f=json",
+        COLLECTION_RESPONSE
+      )
       .mock(
         "https://service-url.com/collections/collection_id/items?f=json&bbox=1%2C2%2C3%2C4",
         COLLECTION_ITEMS_RESPONSE
@@ -133,7 +135,6 @@ describe("model", function() {
     };
 
     model.getData(req, (err, geojson) => {
-      // conso
       expect(err).to.equal(null);
       expect(geojson.type).to.equal("FeatureCollection");
       expect(geojson.features).to.be.an("array");
