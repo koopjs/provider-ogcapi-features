@@ -45,10 +45,28 @@ For example, the following configuration specifies that a host `cubeserv` with t
 }
 ```
 
-Then the user is able to fetch the features with the following URL:
+This provider uses the `:host` and `:id` parameter in the URL to identify the target collection.
+
+The `:host` parameter is the host id defined in the configuration file. In the above example, the user can construct the request URL with the host `cubeserv`.
+
+The `:id` parameter is a collection id from the selected host service. According to the OGCAPI spec, the user can get a list of all collections from the `/collections` request. In the above example, the collection id can be found in
 
 ```
-/ogcapi-features/cubeserv/FeatureServer/0/query
+http://www.pvretano.com/cubewerx/cubeserv/default/wfs/3.0.0/framework/collections?f=json
+```
+
+and `JURISDICTIONAL` is a valid colleciton id.
+
+Then the user is able to fetch the features from this collection with the following URL:
+
+```
+/ogcapi-features/cubeserv/JURISDICTIONAL/FeatureServer/0/query
+```
+
+The actual data comes from the service request
+
+```
+https://eratosthenes.pvretano.com/cubewerx/cubeserv/default/wfs/3.0.0/framework/collections/JURISDICTIONAL/items?f=json
 ```
 
 ## Usage
