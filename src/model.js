@@ -1,8 +1,8 @@
-const fetch = require("node-fetch");
-const NodeCache = require("node-cache");
-const config = require("config");
+require("isomorphic-fetch");
 
-const collections = new NodeCache();
+const config = require("config");
+const { Service } = require("@ogcapi-js/features");
+const services = {};
 
 // Public function to return data from the
 // Return: GeoJSON FeatureCollection
@@ -12,7 +12,7 @@ const collections = new NodeCache();
 // req.params.layer
 function getData(req, callback) {
   const {
-    params: { id }
+    params: { id },
   } = req;
 
   if (id) {
@@ -24,25 +24,16 @@ function getData(req, callback) {
 
 async function getCollectionItems(req, callback) {
   const {
-    params: { host, id }
+    params: { host, id },
   } = req;
-  const hostConfig = config["provider-ogcapi-features"].hosts[host];
 
   try {
-    // construct the request URL
-    const collectionId = id;
-    const hostURL = hostConfig.url;
-    const collection = await getCollection(
-      { id: host, url: hostURL },
-      collectionId
-    );
-    const requestURL = new URL(`${hostURL}/collections/${collectionId}/items`);
-    requestURL.searchParams.set("f", "json");
-
-    // get request result
-    const result = await fetchJSON(requestURL.href);
+    const service = getService(host);
+    const collection = await service.getCollection(id);
+    const result = await service.getFeatures(id);
 
     // construct geojson
+    const hostConfig = config["provider-ogcapi-features"].hosts[host];
     const idField = hostConfig.idField ? hostConfig.idField : "";
     const geojson = {
       type: "FeatureCollection",
@@ -50,8 +41,8 @@ async function getCollectionItems(req, callback) {
       metadata: {
         name: collection.title,
         description: collection.description,
-        idField
-      }
+        idField,
+      },
     };
 
     callback(null, geojson);
@@ -60,30 +51,19 @@ async function getCollectionItems(req, callback) {
   }
 }
 
-async function getCollection({ id, url }, collectionId) {
-  const collectionCacheId = `${id}_${collectionId}`;
+function getService(host) {
+  if (services[host]) {
+    return services[host];
+  } else {
+    const hostConfig = config["provider-ogcapi-features"].hosts[host];
+    const service = new Service({
+      baseUrl: hostConfig.url,
+    });
 
-  if (collections.has(collectionCacheId)) {
-    return collections.get(collectionCacheId);
+    services[host] = service;
+
+    return service;
   }
-
-  const requestURL = new URL(`${url}/collections/${collectionId}`);
-  requestURL.searchParams.set("f", "json");
-
-  const result = await fetchJSON(requestURL.href);
-  collections.set(collectionCacheId, result);
-
-  return result;
-}
-
-async function fetchJSON(url) {
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-
-  return await response.json();
 }
 
 function Model(koop) {}

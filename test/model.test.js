@@ -11,10 +11,10 @@ const PROVIDER_CONFIG = {
   "provider-ogcapi-features": {
     hosts: {
       myhost: {
-        url: "https://service-url.com"
-      }
-    }
-  }
+        url: "https://service-url.com",
+      },
+    },
+  },
 };
 
 const COLLECTION_RESPONSE = {
@@ -23,9 +23,9 @@ const COLLECTION_RESPONSE = {
   description: "collection description",
   extent: {
     spatial: {
-      bbox: [[1, 2, 3, 4]]
-    }
-  }
+      bbox: [[1, 2, 3, 4]],
+    },
+  },
 };
 
 const COLLECTION_ITEMS_RESPONSE = {
@@ -34,32 +34,31 @@ const COLLECTION_ITEMS_RESPONSE = {
       type: "Feature",
       geometry: {
         type: "Point",
-        coordinates: [0, 0]
+        coordinates: [0, 0],
       },
       properties: {
-        time: 123
-      }
-    }
-  ]
+        time: 123,
+      },
+    },
+  ],
 };
 
-describe("model", function() {
-  it("should throw an error if no layer index is provided", done => {
+describe("model", function () {
+  it("should throw an error if no layer index is provided", (done) => {
     const Model = require(modulePath);
     const model = new Model();
     const req = {
-      params: {}
+      params: {},
     };
 
-    model.getData(req, err => {
+    model.getData(req, (err) => {
       expect(err).to.be.an.instanceOf(Error);
       done();
     });
   });
 
-  it("should return collection items if the layer index is specified", done => {
+  it("should return collection items if the layer index is specified", (done) => {
     const fetch = fetchMock
-      .sandbox()
       .mock(
         "https://service-url.com/collections/collection_id?f=json",
         COLLECTION_RESPONSE
@@ -71,7 +70,6 @@ describe("model", function() {
 
     const Model = proxyquire(modulePath, {
       config: PROVIDER_CONFIG,
-      "node-fetch": fetch
     });
 
     const model = new Model();
@@ -79,9 +77,9 @@ describe("model", function() {
       params: {
         host: "myhost",
         id: "collection_id",
-        method: "query"
+        method: "query",
       },
-      query: {}
+      query: {},
     };
 
     model.getData(req, (err, geojson) => {
